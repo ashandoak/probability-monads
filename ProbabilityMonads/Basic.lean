@@ -1,13 +1,12 @@
 /- 
 \ This code based on the tutorial found at https://dennybritz.com/posts/probability-monads-from-scratch/
 -/
-
-import Std.Data.HashMap
+import Batteries
 
 open Std
 
 set_option diagnostics true
-
+set_option diagnostics.threshold 48
 -- Use Float as a representation for probabilities 
 -- def Prob : Type := Float didn't work
 -- abbrev is always unfoled
@@ -16,21 +15,29 @@ abbrev Prob := Float
 -- A distribution is a list of possible values and their probabilities
 -- TODO Is this better as an inductive?
 structure Dist (α : Type) where
-  data : List (α × Prob) 
+  data : List (α × Prob)
+deriving Repr
+
+-- Examples
+def data  := [("a", 0.2), ("b", 0.2), ("c", 0.1), ("a", 0.1), ("c", 0.4)]
+def dist := Dist.mk data
+#check dist
 
 -- Helper function to access the inner list wrapped by the distribution
 def unpackDist (d : Dist α) : List (α × Prob) := d.data
 
--- Helped function to collapse outcomes that occur multiple times
-def squishD [Ord α] (d : Dist α) : Dist α := Dist $ HashMap.toList $ Lean.HashMap.ofListWith (· + ·) d.data
+-- Examples
+#eval unpackDist dist
+#check unpackDist dist
 
+-- Helper function to collapse outcomes that occur multiple times
+def squishD [Ord α] [BEq α] [Hashable α] (d : Dist α) : Dist α := Dist.mk $ Batteries.HashMap.toList $ (Batteries.HashMap.ofListWith d.data (· + ·))
 
-#check HashMap.toList
+def squishD' [BEq α] [Hashable α] (d : Dist α) : Dist α :=
+  Dist.mk $ HashMap.toList $ List.foldl (fun acc (k, v) =>
+    acc.insert k (v + acc.getD k 0)) HashMap.empty $ unpackDist d 
 
-open HashMap
-def ofListWith {α : Type} [BEq α] [Hashable α] (l : List (α × β)) (f : β → β → β) : HashMap α β :=
-  l.foldl (init := HashMap.empty)
-    (fun m p =>
-      match m.find? p.fst with
-        | none   => m.insert p.fst p.snd
-        | some v => m.insert p.fst $ f v p.snd)
+-- Examples
+#eval squishD dist
+#eval squishD' dist
+
