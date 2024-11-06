@@ -9,7 +9,7 @@ set_option diagnostics true
 set_option diagnostics.threshold 48
 -- Use Float as a representation for probabilities 
 -- def Prob : Type := Float didn't work
--- abbrev is always unfoled
+-- abbrev is always unfolded
 abbrev Prob := Float 
 
 -- A distribution is a list of possible values and their probabilities
@@ -40,4 +40,13 @@ def squishD' [BEq α] [Hashable α] (d : Dist α) : Dist α :=
 -- Examples
 #eval squishD dist
 #eval squishD' dist
+
+
+-- Helper function to sum all probabilities in a list
+def sumP (l : List (α × Prob)) : Prob := l.map Prod.snd |>.foldr (· + ·) 0
+
+-- Helper function to normalize probabilities to 1.0
+def normP (l : List (α × Prob)) : List (α × Prob) := 
+  let q := sumP l
+  l.map (fun (a, p) => (a, p/q))
 
