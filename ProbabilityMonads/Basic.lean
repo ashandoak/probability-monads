@@ -66,16 +66,21 @@ def uniform (l : List α) : Dist α :=
 -- A fair n-sided die
 def die (n : Nat) : Dist Nat := uniform $ List.range' 1 n 
 
-/-
+-- Required in coin` since `panic` returns an element of α  
+instance : Inhabited (Dist α) where
+  default := ⟨[]⟩  
+
 -- A coin that lands on x with probability f and y with probability 1-f
-def coin (f : Prob) (x y : α) : Dist a :=
-  match f with
-  | f < 0.0 || f > 1.0 => error "f must be between 0 and 1"
-  | _ => Dist [(x, f), (y, 1 - f)]
--/
+def coin {α : Type} (f : Float) (x y : α) : Dist α :=
+  if f < 0.0 ∨ f > 1.0 then
+    panic "f must be between 0 and 1"
+  else
+    { data := [(x, f), (y, 1.0 - f)] }
+
 def isEven (n : Nat) : Bool :=
   n % 2 == 0
 
 #eval die 6
 #eval die 5
+#eval coin 0.3 true false
 #eval evalD isEven $ die 5
