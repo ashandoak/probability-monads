@@ -84,3 +84,25 @@ def isEven (n : Nat) : Bool :=
 #eval die 5
 #eval coin 0.3 true false
 #eval evalD isEven $ die 5
+
+
+-- Functors and Marginalizing
+
+-- Create an instance of Functor for Dist by implementing fmap
+instance : Functor Dist where
+  map f d := { data := d.data.map (fun (x, p) => (f x, p)) }
+
+
+-- Some examples
+def tuple_dist : Dist (Nat × Nat) := 
+  ⟨ [
+    ((0, 0), 0.1),
+    ((0, 1), 0.2),
+    ((1, 0), 0.3),
+    ((1, 1), 0.4)
+    ] ⟩ 
+
+#check tuple_dist
+
+#eval squishD $ Prod.fst <$> tuple_dist
+#eval squishD $ Prod.snd <$> tuple_dist
