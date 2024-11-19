@@ -106,3 +106,19 @@ def tuple_dist : Dist (Nat × Nat) :=
 
 #eval squishD $ Prod.fst <$> tuple_dist
 #eval squishD $ Prod.snd <$> tuple_dist
+
+def base_dist : Dist Nat :=
+  ⟨ [
+    (1, 0.1),
+    (2, 0.2),
+    (5, 0.7)
+  ] ⟩ 
+
+#eval (fun x => x*2) <$> base_dist
+
+
+-- Applicatives
+
+instance : Applicative Dist where
+  seq dF dA := { data := dF.data.bind (fun (f, pf) => dA).data.map (fun (x, px) => (f x, pf * px)) } 
+  pure x := { data := [(x, 1.0)] }
