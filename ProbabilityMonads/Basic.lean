@@ -121,7 +121,13 @@ def base_dist : Dist Nat :=
 
 
 -- Applicatives
-
+-- My note: List.bind is deprecated in favor of List.flatMap; it makes sense to use flatMap here since 
+-- we're applying a function within a structure, and the underlying structure of Dist is a List (of tuples)
+-- I didn't really get the Haskell notation (using do and ←) - I think I read it with a Lean bias...
 instance : Applicative Dist where
-  seq dF dA := { data := dF.data.bind (fun (f, pf) => dA).data.map (fun (x, px) => (f x, pf * px)) } 
-  pure x := { data := [(x, 1.0)] }
+  --seq dF dA := ⟨List.bind dF.data (fun (f, pf) => Functor.map (fun (x, px) => (f x, px * pf)) $ dA () |>.data)⟩  
+  seq dF dA := ⟨dF.data.bind (fun (f, pf) => dA () |>.data.map (fun (x, px) => (f x, px * pf)))⟩
+  pure x := ⟨[(x, 1.0)]⟩ 
+
+
+#eval (·,·) <$> (die 5) <*> (die 4)
