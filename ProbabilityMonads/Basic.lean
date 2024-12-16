@@ -52,10 +52,11 @@ def normP (l : List (α × Prob)) : List (α × Prob) :=
 
 
 -- An Event maps an outcome to a truth value
+-- My note: This is used as a predicate
 abbrev Event α := α → Bool
 
 -- Evaluate the probability of the given Event
--- I guess the intention is to use this in a compositional way, so that the user will pass in an event and a distribution
+-- My note: I guess the intention is to use this in a compositional way, so that the user will pass in an event and a distribution
 def evalD (p : Event α) (d : Dist α) : Prob := 
   sumP $ (unpackDist d).filter (fun x => p x.fst) 
 
@@ -104,6 +105,8 @@ def tuple_dist : Dist (Nat × Nat) :=
 
 #check tuple_dist
 
+-- My note: This doesn't seem to work the way I would anticipate. Perhaps fst and snd in Haskell do 
+-- something different from Prod.fst and Prod.snd in Lean? 
 #eval squishD $ Prod.fst <$> tuple_dist
 #eval squishD $ Prod.snd <$> tuple_dist
 
