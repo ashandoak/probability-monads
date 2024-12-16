@@ -126,7 +126,7 @@ def base_dist : Dist Nat :=
 -- I didn't really get the Haskell notation (using do and ←) - I think I read it with a Lean bias...
 instance : Applicative Dist where
   --seq dF dA := ⟨List.bind dF.data (fun (f, pf) => Functor.map (fun (x, px) => (f x, px * pf)) $ dA () |>.data)⟩  
-  seq dF dA := ⟨dF.data.bind (fun (f, pf) => dA () |>.data.map (fun (x, px) => (f x, px * pf)))⟩
+  seq dF dA := ⟨dF.data.flatMap (fun (f, pf) => dA () |>.data.map (fun (x, px) => (f x, px * pf)))⟩
   pure x := ⟨[(x, 1.0)]⟩ 
 
 
